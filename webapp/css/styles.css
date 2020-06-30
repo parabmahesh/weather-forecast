@@ -1,4 +1,25 @@
-/* Strikes through the completed items */
-li[data-todo-item-completed="true"] span {
-	text-decoration: line-through;
+.errorMessagePage {
+	height: 25rem;
+}
+
+.temperature {
+	font-size: 2.5rem;
+}
+
+.units {
+	font-size: 1rem;
+}
+
+.weatherBox {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  
+}
+
+.weatherBox:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.mainBox {
+	padding: 2px 16px;
 }

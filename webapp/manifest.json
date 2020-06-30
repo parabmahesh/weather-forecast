@@ -29,9 +29,9 @@
 					"fallbackLocale": "en"
 				}
 			},
-			"": {
+			"citiesModel": {
 				"type": "sap.ui.model.json.JSONModel",
-				"uri": "model/todoitems.json"
+				"uri": "model/cities.json"
 			}
 		},
 		"resources": {

@@ -1,39 +1,102 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc" 
-	xmlns:core="sap.ui.core" 
-	xmlns="sap.m" 
-	xmlns:l="sap.ui.layout" 
-	xmlns:f="sap.ui.layout.form" controllerName="demo.weatherforecast.controller.App" displayBlock="true">
-	<App>
-		<Page>
-			<customHeader>
-				<Bar>
-					<contentLeft>
-						<core:Icon src="sap-icon://cloud"></core:Icon>
-						<Title text="{i18n>TITLE}"></Title>
-					</contentLeft>
-				</Bar>
-			</customHeader>
-			<content>
-				<HBox alignContent="Center" justifyContent="Center">
-					<items>
-						<ComboBox placeholder="Enter city..." items="{
-									path: '/CitiesCollection',
-									sorter: { path: 'text' }
-								}">
-							<core:Item key="{key}" text="{text}" />
-						</ComboBox>
-					</items>
-				</HBox>
-				<HBox align="Center" justifyContent="Center">
-					<items>
-						<GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Cumulative Totals" subheader="Expenses" press="press">
-							<TileContent unit="Unit" footer="Footer Text">
-								<NumericContent value="1762" icon="sap-icon://line-charts" withMargin="false" />
-							</TileContent>
-						</GenericTile>
-					</items>
-				</HBox>
-			</content>
-		</Page>
-	</App>
+<?xml version="1.0" encoding="UTF-8"?>
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form" xmlns:l="sap.ui.layout" controllerName="demo.weatherforecast.controller.App" displayBlock="true">
+   <App>
+      <Page>
+         <customHeader>
+            <Bar>
+               <contentLeft>
+                  <core:Icon src="sap-icon://cloud" />
+                  <Title text="{i18n>TITLE}" />
+               </contentLeft>
+            </Bar>
+         </customHeader>
+         <content>
+            <VBox id="weatherBox" renderType="Bare">
+               <HBox alignContent="Center" justifyContent="Center" class="sapUiSmallMargin">
+                  <items>
+                     <ComboBox placeholder="{i18n>CITY_COMBOBOX_PLACEHOLDER}" selectedKey="Pune" items="{path: 'citiesModel>/CitiesCollection',sorter: { path: 'text' }}" selectionChange="onCitySelectionChange">
+                        <core:Item key="{citiesModel>key}" text="{citiesModel>text}" />
+                     </ComboBox>
+                  </items>
+               </HBox>
+               <FlexBox renderType="Bare">
+                  <items>
+                     <VBox renderType="Bare" width="60%" height="35rem" class="sapUiSmallMarginEnd">
+                        <Panel id="weatherListPanel" class="sapUiResponsiveMargin" accessibleRole="Region">
+                           <headerToolbar>
+                              <OverflowToolbar>
+                                 <Title text="5 Day weather for {pageModel>/selectedCity}" />
+                              </OverflowToolbar>
+                           </headerToolbar>
+                           <content>
+                              <ScrollContainer height="35rem" width="100%" vertical="true" focusable="true">
+                                 <List id="weatherList" includeItemInSelection="true" items="{path: 'weatherModel>/list',sorter: {path: 'date',descending: false,group: '.getDate'},groupHeaderFactory: '.getGroupHeader'}" updateFinished="onUpdateFinished">
+                                    <ObjectListItem title="{path: 'weatherModel>date',type: 'sap.ui.model.type.Time',formatOptions: {pattern: 'hh:hh:a'}}" icon="sap-icon://temperature" type="Active" press="onListItemPress" number="{weatherModel>main/temp}" numberUnit="℃">
+                                       <attributes>
+                                          <ObjectAttribute text="{weatherModel>main/temp_min}(Min) / {weatherModel>main/temp_max}(Max)" />
+                                          <ObjectAttribute text="{weatherModel>weather/0/description}" />
+                                       </attributes>
+                                    </ObjectListItem>
+                                 </List>
+                              </ScrollContainer>
+                           </content>
+                        </Panel>
+                        <HBox alignItems="Center" justifyContent="Center">
+                           <Text text="{i18n>LIST_DESCRIPTION}" class="sapUiSmallMarginTop" />
+                        </HBox>
+                     </VBox>
+                     <HBox renderType="Bare" width="40%" height="25rem" class="sapUiSmallMarginEnd">
+                        <Panel id="weatherDetailsPanel" class="sapUiResponsiveMargin" accessibleRole="Region">
+                           <headerToolbar>
+                              <OverflowToolbar>
+                                 <Title text="{i18n>DETAILS}" />
+                              </OverflowToolbar>
+                           </headerToolbar>
+                           <content>
+                              <FlexBox renderType="Bare" class="sapUiMediumMargin weatherBox" width="100%">
+                                 <layoutData>
+                                    <l:GridData span="XL3 L3 M6 S12" />
+                                 </layoutData>
+                                 <items>
+                                    <VBox class="mainBox">
+                                       <HBox class="sapUiTinyMargin">
+                                          <Title text="{path: 'weatherModel>date',type: 'sap.ui.model.type.Date',formatOptions: { style: 'medium'}}" />
+                                       </HBox>
+                                       <HBox alignItems="Start" justifyContent="SpaceBetween" class="sapUiTinyMargin">
+                                          <core:Icon src="sap-icon://temperature" size="2.5rem" color="red" class="sapUiTinyMargin" />
+                                          <VBox>
+                                             <Title level="H3" text="{weatherModel>main/temp}℃" class="temperature sapUiTinyMarginBegin" />
+                                             <Title level="H4" text="{i18n>FEELS_LIKE} {weatherModel>main/feels_like}℃" class="units sapUiTinyMarginBegin" />
+                                             <Title level="H4" text="{i18n>HUMIDITY} {weatherModel>main/humidity}%" class="units sapUiTinyMarginBegin" />
+                                             <Text text="{weatherModel>weather/0/description}" />
+                                          </VBox>
+                                       </HBox>
+                                       <HBox alignItems="Start" justifyContent="SpaceBetween">
+                                          <Text class="units" text="{i18n>MIN}: {weatherModel>main/temp_min}℃" />
+                                          <Text class="units" text="{i18n>MAX}: {weatherModel>main/temp_max}℃" />
+                                       </HBox>
+                                       <HBox>
+                                          <core:Icon src="sap-icon://umbrella" size="1.5rem" color="blue" class="sapUiTinyMargin" />
+                                          <Title class="units sapUiTinyMargin" level="H3" text="{i18n>CLOUDINESS}: {weatherModel>clouds/all}%" />
+                                       </HBox>
+                                       <HBox>
+                                          <core:Icon src="sap-icon://status-negative" size="1.5rem" color="gray" class="sapUiTinyMargin" />
+                                          <Title class="units sapUiTinyMargin" level="H3" text="{i18n>RAIN}: {weatherModel>rain/3h}{i18n>MM}" />
+                                       </HBox>
+                                    </VBox>
+                                 </items>
+                              </FlexBox>
+                           </content>
+                           <layoutData>
+                              <FlexItemData growFactor="1" />
+                           </layoutData>
+                        </Panel>
+                     </HBox>
+                  </items>
+               </FlexBox>
+               <MessagePage visible="{= ${pageModel>/isError}}" showHeader="false" description="{I18N>ERROR_MESSAGE_PAGE_DESCRIPTION}" text="{i18n>ERROR_MESSAGE_PAGE_RESULT_TEXT}" icon="sap-icon://filter" class="errorMessagePage" />
+            </VBox>
+         </content>
+      </Page>
+   </App>
 </mvc:View>

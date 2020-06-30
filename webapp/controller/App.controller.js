@@ -1,148 +1,110 @@
 sap.ui.define([
-	"sap/ui/Device",
 	"sap/ui/core/mvc/Controller",
-	"sap/ui/model/Filter",
-	"sap/ui/model/FilterOperator",
-	"sap/ui/model/json/JSONModel"
-], function(Device, Controller, Filter, FilterOperator, JSONModel) {
+	"sap/ui/model/json/JSONModel",
+	"demo/weatherforecast/service/WeatherService",
+	"sap/m/GroupHeaderListItem"
+], function (Controller, JSONModel, WeatherService, GroupHeaderListItem) {
 	"use strict";
+
+	const sortWeatherResultsByDate = (weatherResults) => weatherResults.sort((weatherData1, weatherData2) => new Date(weatherData2.dt_txt) - new Date(weatherData1.dt_txt));
+
+	const filterWeatherResults = (weatherResults) => weatherResults.filter(weatherData => new Date(weatherData.dt_txt) > new Date());
 
 	return Controller.extend("demo.weatherforecast.controller.App", {
 
-		onInit: function() {
-			this.aSearchFilters = [];
-			this.aTabFilters = [];
-
-			this.getView().setModel(new JSONModel({
-				isMobile: Device.browser.mobile,
-				filterText: undefined
-			}), "view");
+		onInit: function () {
+			this.initService();
+			this.initModels();
+			this.fetchWeatherDataByCityName();
 		},
 
-		/**
-		 * Adds a new todo item to the bottom of the list.
-		 */
-		addTodo: function() {
-			var oModel = this.getView().getModel();
-			var aTodos = oModel.getProperty("/todos").map(function (oTodo) { return Object.assign({}, oTodo); });
-
-			aTodos.push({
-				title: oModel.getProperty("/newTodo"),
-				completed: false
+		initModels: function () {
+			const view = this.getView();
+			const pageModel = new JSONModel();
+			pageModel.setData({
+				"isError": false,
+				"selectedCity": "Pune"
 			});
 
-			oModel.setProperty("/todos", aTodos);
-			oModel.setProperty("/newTodo", "");
+			view.setModel(pageModel, "pageModel")
 		},
 
-		/**
-		 * Removes all completed items from the todo list.
-		 */
-		clearCompleted: function() {
-			var oModel = this.getView().getModel();
-			var aTodos = oModel.getProperty("/todos").map(function (oTodo) { return Object.assign({}, oTodo); });
-
-			var i = aTodos.length;
-			while (i--) {
-				var oTodo = aTodos[i];
-				if (oTodo.completed) {
-					aTodos.splice(i, 1);
-				}
-			}
-
-			oModel.setProperty("/todos", aTodos);
+		initService: function () {
+			this.service = new WeatherService();
 		},
 
-		/**
-		 * Updates the number of items not yet completed
-		 */
-		updateItemsLeftCount: function() {
-			var oModel = this.getView().getModel();
-			var aTodos = oModel.getProperty("/todos") || [];
-
-			var iItemsLeft = aTodos.filter(function(oTodo) {
-				return oTodo.completed !== true;
-			}).length;
-
-			oModel.setProperty("/itemsLeftCount", iItemsLeft);
+		onCitySelectionChange: function (event) {
+			const selectedItem = event.getParameter("selectedItem");
+			const cityName = selectedItem.getKey();
+			this.setSelectedCity(cityName);
+			this.fetchWeatherDataByCityName(cityName);
 		},
 
-		/**
-		 * Trigger search for specific items. The removal of items is disable as long as the search is used.
-		 * @param {sap.ui.base.Event} oEvent Input changed event
-		 */
-		onSearch: function(oEvent) {
-			var oModel = this.getView().getModel();
-
-			// First reset current filters
-			this.aSearchFilters = [];
-
-			// add filter for search
-			this.sSearchQuery = oEvent.getSource().getValue();
-			if (this.sSearchQuery && this.sSearchQuery.length > 0) {
-				oModel.setProperty("/itemsRemovable", false);
-				var filter = new Filter("title", FilterOperator.Contains, this.sSearchQuery);
-				this.aSearchFilters.push(filter);
-			} else {
-				oModel.setProperty("/itemsRemovable", true);
-			}
-
-			this._applyListFilters();
+		setSelectedCity: function (cityName) {
+			const view = this.getView();
+			view.getModel("pageModel").setProperty("/selectedCity", cityName);
 		},
 
-		onFilter: function(oEvent) {
-			// First reset current filters
-			this.aTabFilters = [];
-
-			// add filter for search
-			this.sFilterKey = oEvent.getParameter("item").getKey();
-
-			// eslint-disable-line default-case
-			switch (this.sFilterKey) {
-				case "active":
-					this.aTabFilters.push(new Filter("completed", FilterOperator.EQ, false));
-					break;
-				case "completed":
-					this.aTabFilters.push(new Filter("completed", FilterOperator.EQ, true));
-					break;
-				case "all":
-				default:
-					// Don't use any filter
-			}
-
-			this._applyListFilters();
+		fetchWeatherDataByCityName: function (cityName = "Pune") {
+			const view = this.getView();
+			view.setBusy(true);
+			this.service.getForeCastByCityName(cityName)
+				.then(weatherData => this.setWeatherData(weatherData))
+				.then(() => view.setBusy(false))
+				.catch(error => this.handleError(error))
 		},
 
-		_applyListFilters: function() {
-			var oList = this.byId("todoList");
-			var oBinding = oList.getBinding("items");
-
-			oBinding.filter(this.aSearchFilters.concat(this.aTabFilters), "todos");
-
-			var sI18nKey;
-			if (this.sFilterKey && this.sFilterKey !== "all") {
-				if (this.sFilterKey === "active") {
-					sI18nKey = "ACTIVE_ITEMS";
-				} else {
-					// completed items: sFilterKey = "completed"
-					sI18nKey = "COMPLETED_ITEMS";
-				}
-				if (this.sSearchQuery) {
-					sI18nKey += "_CONTAINING";
-				}
-			} else if (this.sSearchQuery) {
-				sI18nKey = "ITEMS_CONTAINING";
-			}
-
-			var sFilterText;
-			if (sI18nKey) {
-				var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
-				sFilterText = oResourceBundle.getText(sI18nKey, [this.sSearchQuery]);
-			}
-
-			this.getView().getModel("view").setProperty("/filterText", sFilterText);
+		setWeatherData: function (data) {
+			const view = this.getView();
+			const weatherModel = new JSONModel();
+			const weatherData = Object.assign({}, data);
+			let sortedResults = sortWeatherResultsByDate((filterWeatherResults(weatherData.list)));
+			sortedResults.forEach(data => data.date = new Date(data.dt_txt));
+			weatherData.list = sortedResults;
+			weatherModel.setData(weatherData);
+			view.setModel(weatherModel, "weatherModel");
 		},
 
+		getDate: function (oContext) {
+			const date = oContext.getProperty('date');
+			return new Date(date).toDateString();
+		},
+
+		getGroupHeader: function (oGroup) {
+			return new GroupHeaderListItem({
+				title: oGroup.key,
+				upperCase: false
+			});
+		},
+
+		onListItemPress: function (event) {
+			const panel = this.byId("weatherDetailsPanel");
+			var selectedItem = event.getSource();
+			var bindingContext = selectedItem.getBindingContext("weatherModel");
+			var path = bindingContext.getPath();
+			panel.bindElement({
+				path: path,
+				model: "weatherModel"
+			});
+		},
+
+		onUpdateFinished: function (event) {
+			const view = this.getView()
+			const panel = view.byId("weatherDetailsPanel");
+			const list = view.getModel("weatherModel").getProperty("/list")
+			const initialIndex = list.length - 1 || 0;
+			panel.bindElement({
+				path: `/list/${initialIndex}`,
+				model: "weatherModel"
+			});
+		},
+
+		handleError: function (error) {
+			const view = this.getView();
+			view.setBusy(false);
+			const pageModel = view.getModel("pageModel");
+			pageModel.setProperty("/isError", true);
+		}
 	});
 
 });

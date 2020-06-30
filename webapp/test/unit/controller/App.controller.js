@@ -2,108 +2,59 @@ sap.ui.define([
 	"sap/ui/base/ManagedObject",
 	"sap/ui/core/mvc/Controller",
 	"demo/weatherforecast/controller/App.controller",
+	"demo/weatherforecast/service/WeatherService",
 	"sap/ui/model/json/JSONModel"
-], function(ManagedObject, Controller, AppController, JSONModel) {
+], function (ManagedObject, Controller, AppController, WeatherService, JSONModel) {
 	"use strict";
 
 	QUnit.module("Test model modification", {
 
-		beforeEach: function() {
+		beforeEach: function () {
 			this.oAppController = new AppController();
 			this.oViewStub = new ManagedObject({});
 			sinon.stub(Controller.prototype, "getView").returns(this.oViewStub);
 
 			this.oJSONModelStub = new JSONModel({
-				todos: []
+				list: []
 			});
 			this.oViewStub.setModel(this.oJSONModelStub);
+
+			this.oWeatherService = new WeatherService();
 		},
 
-		afterEach: function() {
+		afterEach: function () {
 			Controller.prototype.getView.restore();
 
 			this.oViewStub.destroy();
+
+			this.oWeatherService = null;
+
+			delete this.oWeatherService;
 		}
 	});
 
-	QUnit.test("Should add a todo element to the model", function(assert) {
+	QUnit.test("Should throw error when city is not passed", function (assert) {
 		// Arrange
 		// initial assumption: to-do list is empty
-		assert.strictEqual(this.oJSONModelStub.getObject("/todos").length, 0, "There must be no todos defined.");
+		assert.strictEqual(this.oJSONModelStub.getObject("/list").length, 0, "There must be no weather data");
 
 		// Act
-		this.oJSONModelStub.setProperty("/newTodo", "new todo item");
-		this.oAppController.addTodo();
+		assert.throws(
+			function () {
+				this.oWeatherService.getForeCastByCityName()
+			},
+			"raised error message contains 'description'"
+		);
 
-		// Assumption
-		assert.strictEqual(this.oJSONModelStub.getObject("/todos").length, 1, "There is one new item.");
 	});
 
-	QUnit.test("Should toggle the completed items in the model", function(assert) {
-		// Arrange
-		var oModelData = {
-			todos: [{
-				"title": "Start this app",
-				"completed": false
-			}],
-			itemsLeftCount: 1
-		};
-		this.oJSONModelStub.setData(oModelData);
-
-		// initial assumption
-		assert.strictEqual(this.oJSONModelStub.getObject("/todos").length, 1, "There is one item.");
-		assert.strictEqual(this.oJSONModelStub.getProperty("/itemsLeftCount"), 1, "There is one item left.");
-
-		// Act
-		this.oJSONModelStub.setProperty("/todos/0/completed", true);
-		this.oAppController.updateItemsLeftCount();
-
-		// Assumption
-		assert.strictEqual(this.oJSONModelStub.getProperty("/itemsLeftCount"), 0, "There is no item left.");
+	QUnit.test("Should fetch a weather for given city", function (assert) {
+		const done = assert.async();
+		const cityName = "Pune";
+		this.oWeatherService.getForeCastByCityName(cityName)
+			.then(data => {
+				assert.equal(data.city.name, cityName, "Data fetched");
+				done();
+			});
 	});
-
-	QUnit.test("Should clear the completed items", function(assert) {
-		// Arrange
-		var oModelData = {
-			todos: [{
-				"title": "Start this app1",
-				"completed": false
-			}, {
-				"title": "Start this app2",
-				"completed": true
-			}],
-			itemsLeftCount: 1
-		};
-		this.oJSONModelStub.setData(oModelData);
-
-
-		// initial assumption
-		assert.strictEqual(this.oJSONModelStub.getObject("/todos").length, 2, "There are two items.");
-		assert.strictEqual(this.oJSONModelStub.getProperty("/itemsLeftCount"), 1, "There is no item left.");
-
-		// Act
-		this.oAppController.clearCompleted();
-		this.oAppController.updateItemsLeftCount();
-
-		// Assumption
-		assert.strictEqual(this.oJSONModelStub.getObject("/todos").length, 1, "There is one item left.");
-		assert.strictEqual(this.oJSONModelStub.getProperty("/itemsLeftCount"), 1, "There is one item left.");
-	});
-
-	QUnit.test("Should update items left count when no todos are loaded, yet", function(assert) {
-		// Arrange
-		var oModelData = {};
-		this.oJSONModelStub.setData(oModelData);
-
-		// initial assumption
-		assert.strictEqual(this.oJSONModelStub.getObject("/todos"), undefined, "There are no items.");
-		assert.strictEqual(this.oJSONModelStub.getProperty("/itemsLeftCount"), undefined, "Items left is not set");
-
-		// Act
-		this.oAppController.updateItemsLeftCount();
-
-		// Assumption
-		assert.strictEqual(this.oJSONModelStub.getProperty("/itemsLeftCount"), 0, "There is no item left.");
-	});
-
 });

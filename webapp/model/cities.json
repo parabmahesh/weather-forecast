@@ -1,0 +1,23 @@
+{
+	"CitiesCollection": [{
+			"key": "Mumbai",
+			"text": "Mumbai"
+		},
+		{
+			"key": "Pune",
+			"text": "Pune"
+		},
+		{
+			"key": "Delhi",
+			"text": "Delhi"
+		},
+		{
+			"key": "Bangalore",
+			"text": "Bangalore"
+		},
+		{
+			"key": "Hyderabad",
+			"text": "Hyderabad"
+		}
+	]
+}
