@@ -4,7 +4,7 @@ sap.ui.define([
 ], function (BaseObject, AppConfig) {
 	"use strict";
 
-	const WeatherService = BaseObject.extend("sap.ui.demo.nav.WeatherService", {
+	const WeatherService = BaseObject.extend("demo.weatherforecast.service.WeatherService", {
 		constructor: function () {
 			BaseObject.call(this);
 		}
