@@ -1,5 +1,5 @@
 # Weather forecast application
-A demo app for weather forecast showing 5 day weather forecast
+A demo app for weather forecast showing 5 day weather
 
 [DEMO](http://www.weather-forecast.com.s3-website.ap-south-1.amazonaws.com/webapp/index.html)
 
