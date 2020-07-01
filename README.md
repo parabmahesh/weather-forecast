@@ -1,7 +1,9 @@
 # Weather forecast application
-A demo app for weather forecast showing 5 day weather
+A weather forecast app showing 5 day weather for selected city
 
-[DEMO](http://www.weather-forecast.com.s3-website.ap-south-1.amazonaws.com/webapp/index.html)
+
+## Demo
+[Please visit this link for sample demo of weather app](http://www.weather-forecast.com.s3-website.ap-south-1.amazonaws.com/webapp/index.html)
 
 ## Getting started
 1. Clone this repository and navigate into it
