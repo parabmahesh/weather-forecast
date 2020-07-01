@@ -9,24 +9,24 @@ A demo app for weather forecast showing 5 day weather
     git clone https://github.com/SAP/weatherforecast.git
     cd weather-forecast
     ```
-1. Install all dependencies
+2. Install all dependencies
     ```sh
     npm install
     ```
 
-1. Start a local server and run the application (http://localhost:8080/index.html)
+3. Start a local server and run the application (http://localhost:8080/index.html)
     ```sh
     npm start
     ```
 
 ## Testing
-* Run  tests to eslint as well ass running qUnit tests and code coverage
+Run  tests to eslint as well ass running qUnit tests and code coverage
     ```sh
     npm run test
     ```
 
 ## Building
-* Execute the build
+Execute the build
     ```sh
     npm run build
     ```
