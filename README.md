@@ -6,7 +6,7 @@ A demo app for weather forecast showing 5 day weather
 ## Getting started
 1. Clone this repository and navigate into it
     ```sh
-    git clone https://github.com/SAP/weatherforecast.git
+    git clone https://github.com/parabmahesh/weather-forecast.git
     cd weather-forecast
     ```
 2. Install all dependencies
@@ -20,13 +20,13 @@ A demo app for weather forecast showing 5 day weather
     ```
 
 ## Testing
-Run  tests to eslint as well ass running qUnit tests and code coverage
-    ```sh
-    npm run test
-    ```
+eslint and run qUnit tests
+```sh
+npm run test
+```
 
 ## Building
 Execute the build
-    ```sh
-    npm run build
-    ```
+```sh
+npm run build
+```
