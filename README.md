@@ -1,23 +1,13 @@
 # weatherforecast
-A demo app for weather forecast
+A demo app for weather forecast showing 5 day weather forecast
 
 [DEMO](http://www.weather-forecast.com.s3-website.ap-south-1.amazonaws.com/webapp/index.html)
-
-## Prerequisites
-To run this app please install UI5 tooling globally as below
-- npm install --global @ui5/cli
-
-### Verify installation
-ui5 --help
-
-- The **UI5 CLI** of the [UI5 Tooling](https://github.com/SAP/ui5-tooling#installing-the-ui5-cli).
-    - For installation instructions please see: [Installing the UI5 CLI](https://github.com/SAP/ui5-tooling#installing-the-ui5-cli).
 
 ## Getting started
 1. Clone this repository and navigate into it
     ```sh
     git clone https://github.com/SAP/weatherforecast.git
-    cd weatherforecast
+    cd weather-forecast
     ```
 1. Install all dependencies
     ```sh
