@@ -26,7 +26,6 @@ A demo app for weather forecast showing 5 day weather
     ```
 
 ## Building
-### Option 1: Standard preload build
 * Execute the build
     ```sh
     npm run build
